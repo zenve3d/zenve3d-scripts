@@ -29,19 +29,7 @@ To drop a part into an *existing* project, paste the script into the **Scripts**
 
 ## Contributing a script
 
-Pull requests are welcome. Please make sure your script:
-
-- **Starts with `zcmd 1`** and runs cleanly end to end in the current Zenve3D release.
-- **Is parametric.** Open with `param` lines for anything someone would want to change (overall size, hole diameters, clearances) and reference them in expressions instead of hard-coding numbers.
-- **Has a header comment** saying what the part is, where its origin sits, which axis the important feature points along, and which dimensions are official versus typical.
-- **Avoids guessed indices.** Prefer datum planes (`plane on XY offset …`) over `face(BODY, I)` where a position is expressible from an origin plane. Where indices are unavoidable, guard them with `!assert` lines so a breaking change fails loudly.
-- **Names its output.** Use `rename body` / `rename feature` so the tree reads well, and set `material` colours where they help recognition.
-- **Ends with asserts** on `bodies`, `bbox` and `stl closed` so reviewers and future engine versions can verify it.
-- Uses **millimetres** and a **lowercase snake_case filename** describing the part (`nema17.zcmd`, `arduino_uno.zcmd`).
-
-Open a PR against `main` with the script and one line added to the table above. Include a screenshot in the PR description if you can.
-
-For the full command reference and authoring workflow, see the [`.zcmd` authoring guide](https://github.com/zenve3d/zenve3d/blob/main/docs/zcmd-authoring.md) in the main Zenve3D repo.
+Pull requests are welcome, one script per PR. Build it in Zenve3D first, keep it parametric, and include a screenshot of the part and a note on where the dimensions came from. The full guidelines and the PR checklist are in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Reporting a problem
 
