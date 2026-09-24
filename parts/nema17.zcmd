@@ -1,0 +1,94 @@
+zcmd 1
+# NEMA 17 stepper motor — reference body for enclosures and brackets.
+# Motor back on the XY plane, mounting face at z = bodyL, shaft along +Z.
+# Two bodies: the housing (with its pilot boss) and the shaft, so a bracket
+# can cut against either one on its own.
+param bodyW     = "42.3" -> $bodyW
+param bodyL     = "40"   -> $bodyL
+param cornerC   = "4"    -> $cornerC
+param pilotD    = "22"   -> $pilotD
+param pilotH    = "2"    -> $pilotH
+param holeSpan  = "31"   -> $holeSpan
+param holeD     = "3"    -> $holeD
+param holeDepth = "4.5"  -> $holeDepth
+param shaftD    = "5"    -> $shaftD
+param shaftL    = "24"   -> $shaftL
+param flatDepth = "0.5"  -> $flatDepth
+param flatL     = "15"   -> $flatL
+
+# body: 42.3 mm square with chamfered corners
+sketch on XY -> $s1 $o1 $xt1 $yt1 $xa1 $ya1
+rect $s1 at (-21.15, -21.15) width "bodyW" height "bodyW" -> $p0 $p1 $p2 $p3 $l0 $l1 $l2 $l3 $c0 $c1 $c2 $c3 $dw $dh
+dim $s1 from $p0 to $ya1 = "bodyW / 2" -> $pu
+dim $s1 from $p0 to $xa1 = "bodyW / 2" -> $pv
+!pump
+!assert dof $s1 == 0
+extrude profile($s1, 0) distance "bodyL" -> $body $dl
+!pump
+chamfer edge($body, 0) distance "cornerC" edge($body, 1) distance "cornerC" edge($body, 4) distance "cornerC" edge($body, 7) distance "cornerC" -> $corners $dc
+!pump
+!assert feature $corners == ok
+
+# mounting face: pilot boss + four M3 holes on the 31 mm square
+sketch on face($body, facing (0, 0, 1)) -> $s2 $o2 $xt2 $yt2 $xa2 $ya2
+circle $s2 at (0, 0) radius "pilotD / 2" -> $pc $pilot $pr
+constrain $s2 coincident $pc $o2 -> $pt
+circle $s2 at (15.5, 15.5) radius "holeD / 2" -> $h0c $h0 $h0r
+circle $s2 at (-15.5, 15.5) radius "holeD / 2" -> $h1c $h1 $h1r
+circle $s2 at (-15.5, -15.5) radius "holeD / 2" -> $h2c $h2 $h2r
+circle $s2 at (15.5, -15.5) radius "holeD / 2" -> $h3c $h3 $h3r
+dim $s2 from $h0c to $ya2 = "holeSpan / 2" -> $h0u
+dim $s2 from $h0c to $xa2 = "holeSpan / 2" -> $h0v
+dim $s2 from $h1c to $ya2 = "holeSpan / 2" -> $h1u
+dim $s2 from $h1c to $xa2 = "holeSpan / 2" -> $h1v
+dim $s2 from $h2c to $ya2 = "holeSpan / 2" -> $h2u
+dim $s2 from $h2c to $xa2 = "holeSpan / 2" -> $h2v
+dim $s2 from $h3c to $ya2 = "holeSpan / 2" -> $h3u
+dim $s2 from $h3c to $xa2 = "holeSpan / 2" -> $h3v
+!pump
+!assert dof $s2 == 0
+!assert regions $s2 == 5
+!assert region $s2 0 entities == ($pilot)
+extrude profile($s2, 0) distance "pilotH" join $body -> $boss $dph
+extrude profile($s2, 1) profile($s2, 2) profile($s2, 3) profile($s2, 4) distance "-holeDepth" cut $body -> $holes $dhd
+!pump
+!assert feature $boss == ok
+!assert feature $holes == ok
+
+# shaft — its own body, standing on the pilot boss
+plane on XY offset "0" "0" "bodyL + pilotH" rotate "0" "0" "0" -> $pilotTop
+sketch on $pilotTop -> $s3 $o3 $xt3 $yt3 $xa3 $ya3
+circle $s3 at (0, 0) radius "shaftD / 2" -> $sc $shaftC $sr
+constrain $s3 coincident $sc $o3 -> $st
+!pump
+!assert dof $s3 == 0
+extrude profile($s3, 0) distance "shaftL" -> $shaft $dsl
+!pump
+
+# D-flat, cut down from the shaft tip
+plane on XY offset "0" "0" "bodyL + pilotH + shaftL" rotate "0" "0" "0" -> $tip
+sketch on $tip -> $s4 $o4 $xt4 $yt4 $xa4 $ya4
+rect $s4 at (2, -3) width "2" height "6" -> $q0 $q1 $q2 $q3 $m0 $m1 $m2 $m3 $k0 $k1 $k2 $k3 $fw $fh
+dim $s4 from $q0 to $ya4 = "shaftD / 2 - flatDepth" -> $fu
+dim $s4 from $q0 to $xa4 = "3" -> $fv
+!pump
+!assert dof $s4 == 0
+extrude profile($s4, 0) distance "-flatL" cut $shaft -> $dflat $dfl
+!pump
+!assert feature $shaft == ok
+!assert feature $dflat == ok
+
+rename body $body = "NEMA 17"
+rename body $shaft = "Shaft"
+rename feature $boss = "Pilot"
+rename feature $holes = "M3 Holes"
+rename feature $shaft = "Shaft"
+rename feature $dflat = "D-Flat"
+
+# finish: black anodised housing, ground steel shaft
+material $body = "Black Anodised" rgb 26282c
+material $shaft = "Steel" rgb c8ccd2
+!pump
+!assert bodies == 2
+!assert bbox $body ~= (42.3, 42.3, 42)
+!assert stl closed
