@@ -1,0 +1,67 @@
+zcmd 1
+# M3 heat-set insert boss — a printable boss with the pocket for a standard
+# M3 x 5.7 mm brass insert (4.0 mm OD, the common 3D-printing size), a
+# lead-in chamfer at the mouth so the insert self-centres under the iron,
+# and a clearance pocket below for the screw tip.
+# Boss stands on the XY plane, axis along +Z, mouth at z = bossH.
+# Pocket 4.0 x 6.5 is the makers' consensus for the M3 x 5.7 insert (insert
+# length + ~0.8 mm); the boss OD of 8 leaves a 2 mm wall. All of these are
+# typical rather than a datasheet — check your insert's recommended hole.
+# One body. Paste the script into an existing project and join the boss into
+# your wall or floor; the pocket and clearance come with it.
+param insertD   = "4.0" -> $insertD
+param pocketH   = "6.5" -> $pocketH
+param lead      = "0.4" -> $lead
+param tipD      = "3.2" -> $tipD
+param tipH      = "2"   -> $tipH
+param bossD     = "8"   -> $bossD
+param bossH     = "10"  -> $bossH
+
+# boss
+sketch on XY -> $s1 $o1 $xt1 $yt1 $xa1 $ya1
+circle $s1 at (0, 0) radius "bossD / 2" -> $bc $bossC $br
+constrain $s1 coincident $bc $o1 -> $bt
+!pump
+!assert dof $s1 == 0
+extrude profile($s1, 0) distance "bossH" -> $boss $dbh
+!pump
+!assert feature $boss == ok
+
+# insert pocket, cut down from the mouth
+plane on XY offset "0" "0" "bossH" rotate "0" "0" "0" -> $mouth
+sketch on $mouth -> $s2 $o2 $xt2 $yt2 $xa2 $ya2
+circle $s2 at (0, 0) radius "insertD / 2" -> $pc $pocketC $pr
+constrain $s2 coincident $pc $o2 -> $pt
+!pump
+!assert dof $s2 == 0
+extrude profile($s2, 0) distance "-pocketH" cut $boss -> $pocket $dph
+!pump
+!assert feature $pocket == ok
+
+# screw-tip clearance below the insert
+plane on XY offset "0" "0" "bossH - pocketH" rotate "0" "0" "0" -> $floor
+sketch on $floor -> $s3 $o3 $xt3 $yt3 $xa3 $ya3
+circle $s3 at (0, 0) radius "tipD / 2" -> $tc $tipC $tr
+constrain $s3 coincident $tc $o3 -> $tt
+!pump
+!assert dof $s3 == 0
+extrude profile($s3, 0) distance "-tipH" cut $boss -> $tip $dth
+!pump
+!assert feature $tip == ok
+
+# lead-in chamfer on the pocket mouth (the circular edge at z = bossH, r = insertD/2)
+!assert edge $boss 3 midpoint ~= (-2, 0, 10) tol 0.05
+chamfer edge($boss, 3) distance "lead" -> $leadIn $dl
+!pump
+!assert feature $leadIn == ok
+
+rename body $boss = "M3 Insert Boss"
+rename feature $boss = "Boss"
+rename feature $pocket = "Insert Pocket"
+rename feature $tip = "Screw Tip Clearance"
+rename feature $leadIn = "Lead-In"
+material $boss = "Print" rgb 3478f6
+!pump
+!assert bodies == 1
+!assert bbox $boss ~= (8, 8, 10) tol 0.1
+!assert stl closed
