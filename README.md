@@ -15,6 +15,7 @@ A `.zcmd` file is a **parametric CAD recipe**, not a mesh: one command per line,
 | Script | Description | Key params |
 |---|---|---|
 | [`parts/nema17.zcmd`](parts/nema17.zcmd) | NEMA 17 stepper motor: chamfered housing, pilot boss, 4× M3 holes on the 31 mm square, D-flat shaft. Housing and shaft are separate bodies so brackets can cut against either. | `bodyL`, `shaftD`, `shaftL`, `holeSpan` |
+| [`parts/gt2_pulley_20t.zcmd`](parts/gt2_pulley_20t.zcmd) | GT2 timing pulley, 20T, 5 mm bore: 16 mm flanges, 7.5 mm tooth ring for 6 mm belt, 12 mm hub with two M3 set screws at 90°. `teeth` drives both the outer diameter and the groove count, so 16T or 36T is one slider. Fits the NEMA 17 shaft. | `teeth`, `boreD`, `beltW`, `flangeD`, `hubH` |
 | [`parts/m3_heat_insert.zcmd`](parts/m3_heat_insert.zcmd) | M3 heat-set insert boss: 8 mm printable boss with the 4.0 × 6.5 mm pocket for a standard M3 × 5.7 brass insert, a lead-in chamfer at the mouth and a screw-tip clearance pocket below. Join it into a wall or floor. | `insertD`, `pocketH`, `bossD`, `bossH`, `lead` |
 | [`parts/arduino_uno.zcmd`](parts/arduino_uno.zcmd) | Arduino Uno R3: official PCB outline and mounting holes, USB-B and barrel jack overhangs, headers with pin holes, main ICs, caps, reset button and LEDs. Each component is its own body with its own colour. | `pcb`, `usb_over`, `jack_over`, `hdr_h` |
 

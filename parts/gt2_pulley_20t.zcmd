@@ -1,0 +1,131 @@
+zcmd 1
+# GT2 timing pulley, 20 teeth, 5 mm bore — the pulley that goes on the NEMA 17
+# in this repo (parts/nema17.zcmd). The common aluminium 20T pulley for 6 mm
+# belt: 16 mm flanges, 7.5 mm tooth width, 12 mm hub with two M3 set screws
+# at 90°, 16 mm tall overall.
+# Hub on the XY plane (motor side), axis along +Z, bore through. Slide it onto
+# the NEMA 17 shaft with the hub toward the motor.
+# Tooth OD follows the GT2 formula (pitch diameter - 2 x 0.254); the grooves
+# are round approximations of the GT2 profile, deep enough to read as teeth
+# and to check belt clearance, not a mating tooth form. Hub, flange and set
+# screw sizes are typical of the pulleys sold for 3D printers, not a datasheet.
+# `teeth` drives the OD and the groove count together: set it to 16 or 36 and
+# the pulley resizes. One body.
+param teeth   num = "20"    -> $teeth
+param pitch       = "2"     -> $pitch
+param boreD       = "5"     -> $boreD
+param hubD        = "12"    -> $hubD
+param hubH        = "6.5"   -> $hubH
+param flangeD     = "16"    -> $flangeD
+param flangeT     = "1"     -> $flangeT
+param beltW       = "7.5"   -> $beltW
+param toothDepth  = "0.75"  -> $toothDepth
+param grooveR     = "0.6"   -> $grooveR
+param setD        = "3"     -> $setD
+
+# hub
+sketch on XY -> $s1 $o1 $xt1 $yt1 $xa1 $ya1
+circle $s1 at (0, 0) radius "hubD / 2" -> $hc $hubC $hr
+constrain $s1 coincident $hc $o1 -> $ht
+!pump
+!assert dof $s1 == 0
+extrude profile($s1, 0) distance "hubH" -> $pulley $dh
+!pump
+!assert feature $pulley == ok
+
+# lower flange
+plane on XY offset "0" "0" "hubH" rotate "0" "0" "0" -> $pf1
+sketch on $pf1 -> $s2 $o2 $xt2 $yt2 $xa2 $ya2
+circle $s2 at (0, 0) radius "flangeD / 2" -> $f1c $f1C $f1r
+constrain $s2 coincident $f1c $o2 -> $f1t
+!pump
+!assert dof $s2 == 0
+extrude profile($s2, 0) distance "flangeT" join $pulley -> $flange1 $df1
+!pump
+!assert feature $flange1 == ok
+
+# tooth cylinder: GT2 outer diameter = pitch diameter - 2 * 0.254
+plane on XY offset "0" "0" "hubH + flangeT" rotate "0" "0" "0" -> $pteeth
+sketch on $pteeth -> $s3 $o3 $xt3 $yt3 $xa3 $ya3
+circle $s3 at (0, 0) radius "teeth * pitch / (2 * 3.14159265) - 0.254" -> $tc $tC $tr
+constrain $s3 coincident $tc $o3 -> $tt
+!pump
+!assert dof $s3 == 0
+extrude profile($s3, 0) distance "beltW" join $pulley -> $teethBody $dtw
+!pump
+!assert feature $teethBody == ok
+
+# upper flange
+plane on XY offset "0" "0" "hubH + flangeT + beltW" rotate "0" "0" "0" -> $pf2
+sketch on $pf2 -> $s4 $o4 $xt4 $yt4 $xa4 $ya4
+circle $s4 at (0, 0) radius "flangeD / 2" -> $f2c $f2C $f2r
+constrain $s4 coincident $f2c $o4 -> $f2t
+!pump
+!assert dof $s4 == 0
+extrude profile($s4, 0) distance "flangeT" join $pulley -> $flange2 $df2
+!pump
+!assert feature $flange2 == ok
+
+# one tooth groove on the +X side, then a ring of `teeth` of them about Z
+sketch on $pteeth -> $s5 $o5 $xt5 $yt5 $xa5 $ya5
+circle $s5 at (5.9, 0) radius "grooveR" -> $gc $gC $gr
+dim $s5 from $gc to $ya5 = "teeth * pitch / (2 * 3.14159265) - 0.254 + grooveR - toothDepth" -> $gu
+constrain $s5 coincident $gc $xa5 -> $gv
+!pump
+!assert dof $s5 == 0
+extrude profile($s5, 0) distance "beltW" cut $pulley -> $groove $dg
+!pump
+!assert feature $groove == ok
+
+sketch on YZ -> $sa $oa $xta $yta $xla $yla
+pattern circular count "teeth" axis $yla every "360 / teeth" $groove -> $grooves $gn $ga
+!pump
+!assert feature $grooves == ok
+
+# set screws: two M3 holes through the hub wall, radial, 90° apart
+sketch on XZ -> $s6 $o6 $xt6 $yt6 $xa6 $ya6
+circle $s6 at (0, 3.25) radius "setD / 2" -> $ss1c $ss1C $ss1r
+constrain $s6 coincident $ss1c $ya6 -> $ss1u
+dim $s6 from $ss1c to $xa6 = "hubH / 2" -> $ss1v
+!pump
+!assert dof $s6 == 0
+extrude profile($s6, 0) distance "hubD" cut $pulley -> $set1 $ds1
+!pump
+!assert feature $set1 == ok
+
+sketch on YZ -> $s7 $o7 $xt7 $yt7 $xa7 $ya7
+circle $s7 at (0, 3.25) radius "setD / 2" -> $ss2c $ss2C $ss2r
+constrain $s7 coincident $ss2c $ya7 -> $ss2u
+dim $s7 from $ss2c to $xa7 = "hubH / 2" -> $ss2v
+!pump
+!assert dof $s7 == 0
+extrude profile($s7, 0) distance "hubD" cut $pulley -> $set2 $ds2
+!pump
+!assert feature $set2 == ok
+
+# bore, cut through from the top
+plane on XY offset "0" "0" "hubH + 2 * flangeT + beltW" rotate "0" "0" "0" -> $ptop
+sketch on $ptop -> $s8 $o8 $xt8 $yt8 $xa8 $ya8
+circle $s8 at (0, 0) radius "boreD / 2" -> $bc $bC $br
+constrain $s8 coincident $bc $o8 -> $bt
+!pump
+!assert dof $s8 == 0
+extrude profile($s8, 0) distance "-(hubH + 2 * flangeT + beltW)" cut $pulley -> $bore $db
+!pump
+!assert feature $bore == ok
+
+rename body $pulley = "GT2 Pulley 20T"
+rename feature $pulley = "Hub"
+rename feature $flange1 = "Lower Flange"
+rename feature $teethBody = "Tooth Ring"
+rename feature $flange2 = "Upper Flange"
+rename feature $groove = "Tooth Groove"
+rename feature $grooves = "Teeth"
+rename feature $set1 = "Set Screw 1"
+rename feature $set2 = "Set Screw 2"
+rename feature $bore = "Bore"
+material $pulley = "Aluminium" rgb b8bcc2
+!pump
+!assert bodies == 1
+!assert bbox $pulley ~= (16, 16, 16) tol 0.1
+!assert stl closed
