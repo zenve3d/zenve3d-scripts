@@ -9,6 +9,17 @@ A `.zcmd` file is a **parametric CAD recipe**, not a mesh: one command per line,
 | Folder | Contents |
 |---|---|
 | `parts/` | Reusable parts and reference bodies — motors, boards, hardware you design *around* — plus printable fixtures like insert bosses |
+| `addins/` | Add-ins — scripts that declare value props, so Run opens a panel to set them before the part is drawn |
+
+## The in-app library
+
+`library.json` at the root is the index the Zenve3D app reads: every script listed there shows up in the **Library** section of the Scripts panel, on the Mac, the iPad and the web, within a few minutes of the PR merging — no app release. Each entry is:
+
+```json
+{ "id": "nema17", "title": "NEMA 17 stepper motor", "description": "…", "kind": "part", "path": "parts/nema17.zcmd" }
+```
+
+`id` is a lowercase slug (`a-z`, `0-9`, `-`), `kind` is `part` or `addin`, and `path` points at the `.zcmd` under `parts/` or `addins/`. An entry that breaks any of those is skipped by the app. A script not listed in `library.json` is still in the repo, just not in the app.
 
 ### Parts
 

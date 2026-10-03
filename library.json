@@ -1,0 +1,32 @@
+{
+  "entries": [
+    {
+      "id": "nema17",
+      "title": "NEMA 17 stepper motor",
+      "description": "Reference body for brackets and enclosures: chamfered housing, pilot boss, 4× M3 holes on the 31 mm square, D-flat shaft.",
+      "kind": "part",
+      "path": "parts/nema17.zcmd"
+    },
+    {
+      "id": "gt2-pulley-20t",
+      "title": "GT2 pulley, 20T",
+      "description": "GT2 timing pulley for 6 mm belt, 5 mm bore, two M3 set screws. `teeth` drives the diameter and the groove count.",
+      "kind": "part",
+      "path": "parts/gt2_pulley_20t.zcmd"
+    },
+    {
+      "id": "m3-heat-insert",
+      "title": "M3 heat-set insert boss",
+      "description": "Printable 8 mm boss with the pocket for a standard M3 × 5.7 brass insert, a lead-in chamfer and a screw-tip clearance.",
+      "kind": "part",
+      "path": "parts/m3_heat_insert.zcmd"
+    },
+    {
+      "id": "arduino-uno",
+      "title": "Arduino Uno R3",
+      "description": "PCB outline and mounting holes, USB-B and barrel jack overhangs, headers, ICs and LEDs, each its own body.",
+      "kind": "part",
+      "path": "parts/arduino_uno.zcmd"
+    }
+  ]
+}
