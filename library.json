@@ -27,6 +27,13 @@
       "description": "PCB outline and mounting holes, USB-B and barrel jack overhangs, headers, ICs and LEDs, each its own body.",
       "kind": "part",
       "path": "parts/arduino_uno.zcmd"
+    },
+    {
+      "id": "flange",
+      "title": "Flange",
+      "description": "A round plate with a centre bore and a ring of bolt holes. Set the diameter, bore, bolt circle, hole count and size, and thickness.",
+      "kind": "addin",
+      "path": "addins/flange.zcmd"
     }
   ]
 }

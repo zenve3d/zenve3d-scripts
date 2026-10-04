@@ -30,6 +30,14 @@ A `.zcmd` file is a **parametric CAD recipe**, not a mesh: one command per line,
 | [`parts/m3_heat_insert.zcmd`](parts/m3_heat_insert.zcmd) | M3 heat-set insert boss: 8 mm printable boss with the 4.0 × 6.5 mm pocket for a standard M3 × 5.7 brass insert, a lead-in chamfer at the mouth and a screw-tip clearance pocket below. Join it into a wall or floor. | `insertD`, `pocketH`, `bossD`, `bossH`, `lead` |
 | [`parts/arduino_uno.zcmd`](parts/arduino_uno.zcmd) | Arduino Uno R3: official PCB outline and mounting holes, USB-B and barrel jack overhangs, headers with pin holes, main ICs, caps, reset button and LEDs. Each component is its own body with its own colour. | `pcb`, `usb_over`, `jack_over`, `hdr_h` |
 
+### Add-ins
+
+| Script | Description | Props |
+|---|---|---|
+| [`addins/flange.zcmd`](addins/flange.zcmd) | Flange: a round plate with a centre bore and a ring of bolt holes, the holes a circular pattern of one cut. | `diameter`, `bore`, `bolt`, `holes`, `hole` (M2–M5 clearance), `thickness` |
+
+An add-in opens with `input KIND NAME = "DEFAULT" [label "…"] [choice "…" …]` lines — `length`, `angle`, `number`, `int` or `toggle`. Each is a `param` the user fills in before the script runs; outside the app it runs with its defaults.
+
 ## Using a script
 
 1. Download the `.zcmd` file (or clone this repo).

@@ -1,0 +1,31 @@
+zcmd 1
+# Flange — a round plate with a centre bore and a ring of bolt holes.
+# An add-in: Run opens its props; every value lands as an editable parameter.
+input length diameter  = "60"  label "Diameter"
+input length bore      = "20"  label "Bore"
+input length bolt      = "45"  label "Bolt circle"
+input int    holes     = "6"   label "Holes"
+input length hole      = "3.4" label "Hole" choice "2.4" "3.4" "4.5" "5.5"
+input length thickness = "5"   label "Thickness"
+
+# The plate: two circles on the origin; region 0 is the ring between them.
+sketch on XY                                      -> $s $o $xt $yt $xl $yl
+circle $s at (0, 0) radius "diameter / 2"         -> $dp $dc $dr
+circle $s at (0, 0) radius "bore / 2"             -> $bp $bc $br
+constrain $s coincident $dp $o
+constrain $s coincident $bp $o
+extrude profile($s, 0) distance "thickness"       -> $plate $pd
+!pump
+
+# One bolt hole on the bolt circle, cut through the plate.
+sketch on XY                                      -> $hs $ho $hxt $hyt $hxl $hyl
+circle $hs at (22.5, 0) radius "hole / 2"         -> $hp $hc $hr
+dim $hs from $hp to $hyl = "bolt / 2"            -> $hu
+constrain $hs coincident $hp $hxl
+extrude profile($hs, 0) distance "thickness" cut $plate -> $seed $sd
+!pump
+
+# The axis: a sketch on YZ whose v axis runs along world Z.
+sketch on YZ                                      -> $ax $axo $axxt $axyt $axxl $axyl
+pattern circular count "holes" axis $axyl every "360 / holes" $seed -> $ring $rn $ra
+!pump
