@@ -4,6 +4,7 @@ zcmd 1
 # parameter, and the tooth is placed by formulas, so editing `teeth` or
 # `module` later reshapes the gear. Two gears of the same module and pressure
 # angle mesh at a centre distance of module × (teeth1 + teeth2) / 2.
+prefix gear
 input length module    = "1"  label "Module"
 input int    teeth     = "20" label "Teeth"
 input angle  pressure  = "20" label "Pressure angle" choice "14.5" "20" "25"

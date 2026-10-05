@@ -1,6 +1,7 @@
 zcmd 1
 # Flange — a round plate with a centre bore and a ring of bolt holes.
 # An add-in: Run opens its props; every value lands as an editable parameter.
+prefix flange
 input length diameter  = "60"  label "Diameter"
 input length bore      = "20"  label "Bore"
 input length bolt      = "45"  label "Bolt circle"
