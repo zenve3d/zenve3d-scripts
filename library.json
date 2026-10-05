@@ -34,6 +34,13 @@
       "description": "A round plate with a centre bore and a ring of bolt holes. Set the diameter, bore, bolt circle, hole count and size, and thickness.",
       "kind": "addin",
       "path": "addins/flange.zcmd"
+    },
+    {
+      "id": "spur-gear",
+      "title": "Spur Gear",
+      "description": "An involute spur gear. Set the module, teeth, pressure angle, thickness, backlash and bore; edit any of them later and the gear follows.",
+      "kind": "addin",
+      "path": "addins/spur_gear.zcmd"
     }
   ]
 }

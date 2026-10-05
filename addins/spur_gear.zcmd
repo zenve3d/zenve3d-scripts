@@ -1,0 +1,78 @@
+zcmd 1
+# Spur Gear — an involute spur gear from its module, tooth count and pressure
+# angle. An add-in: Run opens its props; every value lands as an editable
+# parameter, and the tooth is placed by formulas, so editing `teeth` or
+# `module` later reshapes the gear. Two gears of the same module and pressure
+# angle mesh at a centre distance of module × (teeth1 + teeth2) / 2.
+input length module    = "1"  label "Module"
+input int    teeth     = "20" label "Teeth"
+input angle  pressure  = "20" label "Pressure angle" choice "14.5" "20" "25"
+input length thickness = "5"  label "Thickness"
+input length backlash  = "0"  label "Backlash"
+input length bore      = "5"  label "Bore diameter"
+
+# The circles every gear is drawn from, and the tooth's half-width: the
+# thickness at the pitch circle is half the circular pitch, less backlash,
+# carried down to the base circle by the involute function tan(a) - a.
+param pitch_r = "module * teeth / 2"
+param base_r  = "pitch_r * cos(pressure)"
+param tip_r   = "pitch_r + module"
+param root_r  = "pitch_r - 1.25 * module"
+param floor_r = "root_r - module / 2"
+param half_tooth deg = "(pi * module / 2 - backlash) / (2 * pitch_r) * 180deg / pi + tan(pressure) * 180deg / pi - pressure"
+
+# The flank is the involute of the base circle, rolled from where it leaves
+# the root (or just above the base circle, when the root is below it) out to
+# the tip. Roll angles are kept in degrees; `/ 180deg * pi` is the radian.
+param roll_end   deg = "sqrt((tip_r / base_r)^2 - 1) * 180deg / pi"
+param roll_start deg = "max(sqrt(max((root_r / base_r)^2 - 1, 0)) * 180deg / pi, roll_end / 10)"
+param start_r     = "base_r * sqrt(1 + (roll_start / 180deg * pi)^2)"
+param start_a deg = "half_tooth - roll_start + atan(roll_start / 180deg * pi)"
+param end_a   deg = "half_tooth - roll_end + atan(roll_end / 180deg * pi)"
+# One cubic per flank: its control points sit along the involute's tangent
+# at each end, a third of the roll out (within microns of the true curve).
+param lead0     = "base_r * ((roll_end - roll_start) / 180deg * pi) * (roll_start / 180deg * pi) / 3"
+param lead1     = "base_r * ((roll_end - roll_start) / 180deg * pi) * (roll_end / 180deg * pi) / 3"
+param dir0  deg = "half_tooth - roll_start"
+param dir1  deg = "half_tooth - roll_end"
+
+# The body: the root circle and the bore; region 0 is the ring between.
+sketch on XY                                      -> $bs $bo $bxt $byt $bxl $byl
+circle $bs at (0, 0) radius "root_r"              -> $rp $rc $rr
+circle $bs at (0, 0) radius "bore / 2"            -> $hp $hc $hr
+constrain $bs coincident $rp $bo
+constrain $bs coincident $hp $bo
+extrude profile($bs, 0) distance "thickness"      -> $gear $gd
+!pump
+
+# One tooth on the +u axis, every point placed by its formula so the tooth
+# reshapes when a prop is edited later: two mirrored involute flanks, the tip
+# arc about the origin, and a foot sunk below the root circle so the join is
+# clean. The lower tip is placed by its u alone — the arc puts it on the tip
+# circle.
+sketch on XY                                      -> $ts $to $txt $tyt $txl $tyl
+point $ts at ("floor_r * cos(start_a)", "floor_r * sin(start_a)")   -> $b1
+point $ts at ("start_r * cos(start_a)", "start_r * sin(start_a)")   -> $f1
+point $ts at ("start_r * cos(start_a) + lead0 * cos(dir0)", "start_r * sin(start_a) + lead0 * sin(dir0)") -> $c1
+point $ts at ("tip_r * cos(end_a) - lead1 * cos(dir1)", "tip_r * sin(end_a) - lead1 * sin(dir1)") -> $d1
+point $ts at ("tip_r * cos(end_a)", "tip_r * sin(end_a)")           -> $e1
+point $ts at ("floor_r * cos(start_a)", "-floor_r * sin(start_a)")  -> $b2
+point $ts at ("start_r * cos(start_a)", "-start_r * sin(start_a)")  -> $f2
+point $ts at ("start_r * cos(start_a) + lead0 * cos(dir0)", "-start_r * sin(start_a) - lead0 * sin(dir0)") -> $c2
+point $ts at ("tip_r * cos(end_a) - lead1 * cos(dir1)", "-tip_r * sin(end_a) + lead1 * sin(dir1)") -> $d2
+point $ts at (10.99, -0.35)                       -> $e2
+dim $ts u $e2 = "tip_r * cos(end_a)"
+line  $ts from $b1 to $f1                         -> $l1
+cubic $ts from $f1 via $c1 $d1 to $e1             -> $k1
+arc   $ts centre $to from $e2 to $e1              -> $tip
+cubic $ts from $f2 via $c2 $d2 to $e2             -> $k2
+line  $ts from $f2 to $b2                         -> $l2
+line  $ts from $b2 to $b1                         -> $l3
+!pump
+extrude profile($ts, 0) distance "thickness" join $gear -> $tooth $tdd
+!pump
+
+# The axis: a sketch on YZ whose v axis runs along world Z.
+sketch on YZ                                      -> $ax $axo $axxt $axyt $axxl $axyl
+pattern circular count "teeth" axis $axyl every "360 / teeth" $tooth -> $ring $rn $ra
+!pump

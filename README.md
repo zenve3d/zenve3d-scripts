@@ -35,6 +35,7 @@ A `.zcmd` file is a **parametric CAD recipe**, not a mesh: one command per line,
 | Script | Description | Props |
 |---|---|---|
 | [`addins/flange.zcmd`](addins/flange.zcmd) | Flange: a round plate with a centre bore and a ring of bolt holes, the holes a circular pattern of one cut. | `diameter`, `bore`, `bolt`, `holes`, `hole` (M2–M5 clearance), `thickness` |
+| [`addins/spur_gear.zcmd`](addins/spur_gear.zcmd) | Spur Gear: an involute spur gear — a body sketch, one tooth (two cubic involute flanks and a tip arc, every point placed by a formula), the extrudes and a circular pattern. Gears of the same module and pressure angle mesh at `module × (z1 + z2) / 2`. | `module`, `teeth`, `pressure` (14.5°/20°/25°), `thickness`, `backlash`, `bore` |
 
 An add-in opens with `input KIND NAME = "DEFAULT" [label "…"] [choice "…" …]` lines — `length`, `angle`, `number`, `int` or `toggle`. Each is a `param` the user fills in before the script runs; outside the app it runs with its defaults.
 
